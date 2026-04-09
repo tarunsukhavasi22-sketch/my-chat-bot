@@ -1,0 +1,36 @@
+name: Build and Push to Quay.io
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    name: Build image and push to Quay.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            quay.io/${{ secrets.QUAY_USERNAME }}/ai-chatbot:latest
+            quay.io/${{ secrets.QUAY_USERNAME }}/ai-chatbot:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

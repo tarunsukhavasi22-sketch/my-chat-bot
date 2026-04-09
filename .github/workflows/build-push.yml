@@ -24,6 +24,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate image tag
+        id: tag
+        run: echo "version=$(date +'%y').${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
@@ -31,6 +35,6 @@ jobs:
           push: true
           tags: |
             quay.io/${{ secrets.QUAY_USERNAME }}/ai-chatbot:latest
-            quay.io/${{ secrets.QUAY_USERNAME }}/ai-chatbot:${{ github.sha }}
+            quay.io/${{ secrets.QUAY_USERNAME }}/ai-chatbot:${{ steps.tag.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
